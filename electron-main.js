@@ -1,20 +1,54 @@
 const { app, BrowserWindow } = require('electron')
+const electron = require('electron')
+const path = require("path");
+const url = require("url");
+var express=require('express') ;
+//var path=require('path');
+var bodyParser=require('body-parser') ;
+var mongo=require('mongoose') ;
+var server = require('./app');
+
+require('electron-reload')(__dirname);
+console.log(__dirname) 
+mongo.connect('mongodb://localhost/pyrocrm')
+     .then(() => console.log('Connected to MongoDB...'))
+     .catch(err => console.error('Could not connect to MongoDB...'));
+     var Schema=mongo.Schema ;
+
+var UsersSchema = new Schema({
+         name: {type:String},
+         address: {type:String}
+     }, {versionKey:false}) ;
+
+var model=mongo.model('users', UsersSchema, 'users') ;
 
 let win;
 
 function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({
-    fullscreen: true,
+  //  fullscreen: true,
     backgroundColor: '#ffffff',
-    icon: `file://${__dirname}/dist/assets/logo.png`
+    icon: `file://${__dirname}/src/assets/logo.png`,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: false
+    }
   })
 
 
-  win.loadURL(`file://${__dirname}/dist/index.html`)
+  //var r=win.loadURL(`file://${__dirname}/src/index.html`)
+  //win.loadURL("http://localhost:4200/") ;
+  win.loadURL(
+    url.format({
+      pathname: path.join(__dirname, `/dist/index.html`),
+      protocol: "file:",
+      slashes: true
+    })
+  );
 
   //// uncomment below to open the DevTools.
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   // Event when the window is closed.
   win.on('closed', function () {

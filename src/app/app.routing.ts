@@ -4,20 +4,29 @@ import { BrowserModule  } from '@angular/platform-browser';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ClientsComponent } from './clients/clients.component';
+import { SitesComponent } from './sites/sites.component';
 
 const routes: Routes =[
   {
     path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
-  }, {
-    path: '',
-    component: AdminLayoutComponent,
-    children: [
-        {
-      path: '',
-      loadChildren: './layouts/admin-layout/admin-layout.module#AdminLayoutModule'
-  }]}
+    component: DashboardComponent
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent
+    //loadChildren: './layouts/admin-layout/admin-layout.module#AdminLayoutModule'
+  },
+  {
+    path:'sites',
+    component: SitesComponent
+  },
+  {
+    path: 'clients',
+    component: ClientsComponent
+  }
+     
     // { path: 'dashboard',      component: DashboardComponent },
     // { path: 'user-profile',   component: UserProfileComponent },
     // { path: 'table-list',     component: TableListComponent },
@@ -32,8 +41,13 @@ const routes: Routes =[
 @NgModule({
   imports: [
     CommonModule,
-    BrowserModule,
+    BrowserModule,    
     RouterModule.forRoot(routes)
+  ],
+  declarations: [
+    DashboardComponent,
+    ClientsComponent,
+    SitesComponent
   ],
   exports: [
   ],
