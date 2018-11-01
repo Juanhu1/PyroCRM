@@ -6,10 +6,10 @@ var express=require('express') ;
 //var path=require('path');
 var bodyParser=require('body-parser') ;
 var mongo=require('mongoose') ;
-var server = require('./app');
 
+require('./electron-server');
 require('electron-reload')(__dirname);
-console.log(__dirname) 
+
 mongo.connect('mongodb://localhost/pyrocrm')
      .then(() => console.log('Connected to MongoDB...'))
      .catch(err => console.error('Could not connect to MongoDB...'));
@@ -48,7 +48,7 @@ function createWindow () {
   );
 
   //// uncomment below to open the DevTools.
-  win.webContents.openDevTools()
+  //win.webContents.openDevTools()
 
   // Event when the window is closed.
   win.on('closed', function () {

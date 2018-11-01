@@ -1,19 +1,24 @@
-/// SERVER FOR ELECTRON
+/// SERVER FOR BOTH ELECTRON AND ANGULAR
 
-(function () {
+
+ (function () {
     'use strict';
+    const PORT=8712 ;
 
     var express = require('express');
-    var router = express.Router();
     var path = require('path');
   //  var logger = require('morgan');
   //  var cookieParser = require('cookie-parser');
     var bodyParser = require('body-parser');
-  
+    var mongo=require('mongoose') ;    
+
+    mongo.connect('mongodb://localhost/pyrocrm')
+         .then(() => console.log('Connected to MongoDB...'))
+         .catch(err => console.error('Could not connect to MongoDB...'));
 
     var app = express();
     var publicPath = path.resolve(__dirname, './dist');
-    var port = 3000;
+    var port = PORT;
 
     app.use(bodyParser.json({limit:'50mb'})) ;
     app.use(bodyParser.urlencoded({extended:true})) ;
@@ -27,7 +32,7 @@
         res.setHeader('Access-Control-Allow-Credentials',true) ;
         next() ;
     }) ;
-    app.use(router) ;
+    require('./src-server/startup/routes')(app);
     // point for static assets
     app.use(express.static(publicPath));
 
@@ -43,22 +48,6 @@
     }));
 
     
-    router.get('/', function(req, res) {
-        res.render('index', {});
-    });
-
-    router.get("/api/getuser", function(req,res){
-        console.log('incoming get') ;
-        res.send('{"valid":"yes"}') ;
-     /*   model.find( {}, function(err,data) {
-            res.send("{valid:yes}") ;
-            if (err) {
-                res.send(err) ;
-            } else {
-                res.send(data) ;
-            }
-        }) */
-    })
    // app.use(cookieParser());
 
     var server = app.listen(port, function () {
