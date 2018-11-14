@@ -10,12 +10,12 @@ export class DashboardComponent implements OnInit {
   RepData;
   constructor(private commonService:CommonService) { }
   ngOnInit() {
-    this.commonService.getUser().subscribe(data => { 
-      this.RepData = data ;
+    this.commonService.getAllCustomers().subscribe(data => { 
+      this.RepData = data.length ;
       debugger;
     })
     
-    var x=this.commonService.getUser() ;
+    //var x=this.commonService.getUser() ;
    // debugger;
   }
 

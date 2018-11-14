@@ -7,23 +7,23 @@ module.exports = () => {
         var config = {
             src: {
                 root: src,
-                js: src + 'js/',
+                js: src + '',
             },
             build: {
                 root: build,
-                js: build + 'js/',
+                js: build + '',
                 css: build + 'css/',
                 svg: build + 'images/assets/'
             },
             release: {
                 root: release,
-                js: release + 'js/',
+                js: release + '',
                 css: release + 'css/',
                 libs: release + 'js/libs/',
                 webInf: release + 'WEB-INF/',
                 svg: build + 'images/assets/'
             },
-            tsFiles: src + '/js/**/*.ts', // only used for watch, tsconfig.json is used to compile
+            tsFiles: src + '/*.ts', // only used for watch, tsconfig.json is used to compile
             sassFiles: {
                 global: src + 'scss/**/*.s+(a|c)ss',
                 js: [
@@ -32,17 +32,17 @@ module.exports = () => {
                     ]
             },
             otherFiles: [
-                './src/**/*',
-                '!./src/**/*.ts',
-                '!./src/**/*.scss',
-                '!./src/**/*.bak',
-                '!./src/**/*.html'
+                './src-server/**/*',
+                '!./src-server/**/*.ts',
+                '!./src-server/**/*.scss',
+                '!./src-server/**/*.bak',
+                '!./src-server/**/*.html'
             ],            
             webInf: './WEB-INF/weblogic.xml',
             bowerComponents: './bower_components/**/*',
             nodeModules: "./node_modules/",
             bowerPath: "./bower_components/",
-            tsConfig: './tsconfig.json',
+            tsConfig: './tsconfig-forserver.json',
             tsConfigOptimize: './tsconfig_optimize.json',
             sourcemapsOptions: {
             includeContent: false,

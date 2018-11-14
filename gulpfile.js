@@ -1,4 +1,4 @@
-htmlWatchconst gulp = require("gulp");
+const gulp = require("gulp");
 const path = require("path");
 
 const typescript = require("gulp-typescript");
@@ -13,6 +13,7 @@ const svgmin = require("gulp-svgmin");
 const rename = require("gulp-rename");
 const tap = require("gulp-tap");
 const autoprefixer = require("gulp-autoprefixer");
+const nodemon = require('gulp-nodemon') ;
 
 const package = require("./package.json");
 const rootPath = process.cwd();
@@ -41,36 +42,36 @@ function clean(path) {
 }
 
 function cleanBuild() {
-  return clean(path.resolve(config.build.root, "**/*"));
+  return clean(getPath(config.build.root, "**/*"));
 }
 
 function cleanRelease() {
-  return clean(path.resolve(config.release.root, "**/*"));  
+  return clean(getPath(config.release.root, "**/*"));  
 }
 
 function cleanRootFiles() {
   //deleting unused root files in the 
-  clean(path.resolve(config.build.root + "/" + git.short() + "/", "languages.json"));  
-  clean(path.resolve(config.build.root + "/" + git.short() + "/", "blank.html"));  
-  clean(path.resolve(config.build.root + "/" + git.short() + "/images/"));  
-  return clean(path.resolve(config.build.root + "/" + git.short() + "/", "index.html"));    
+  clean(getPath(config.build.root + "/" + git.short() + "/", "languages.json"));  
+  clean(getPath(config.build.root + "/" + git.short() + "/", "blank.html"));  
+  clean(getPath(config.build.root + "/" + git.short() + "/images/"));  
+  return clean(getPath(config.build.root + "/" + git.short() + "/", "index.html"));    
 }
 
 function baseHtml(isWatch) {
   const target = isWatch? config.build.root: config.build.root + git.short();  
-  const enHighlight = fs.readFileSync("./src/css/Highlight.scss", "utf-8").toString();
-  return gulp.src(path.resolve(config.src.root, "**/*.html"))    
-    .pipe($.replace(/<style>/g, '$&' + enHighlight))         
+  //const enHighlight = fs.readFileSync("./src/css/Highlight.scss", "utf-8").toString();
+  return gulp.src(getPath(config.src.root, "**/*.html"))    
+    //.pipe($.replace(/<style>/g, '$&' + enHighlight))         
     .pipe($.newer({
       dest: target,
       ext: '.html'
     }))
     .pipe(gulp.dest(target))
-    .pipe(
+  /*  .pipe(
       browserSync.stream({
         once: true
       })
-    );  
+    );  */
 }
 
 function html() {
@@ -83,13 +84,13 @@ function htmlWatch() {
 
 function baseJson(isWatch) {
   const target = isWatch? config.build.root: config.build.root + git.short();
-  return gulp.src(path.resolve(config.src.root, "**/*.json"))
+  return gulp.src(getPath(config.src.root, "**/*.json"))
     .pipe(gulp.dest(target))
-    .pipe(
+ /*   .pipe(
       browserSync.stream({
         once: true
       })
-    );
+    );*/
 }
 
 function json() {
@@ -101,19 +102,19 @@ function jsonWatch() {
 }
 
 function jsWatch() {
-  return gulp.src(path.resolve(config.src.root, "**/*.js"))
+  return gulp.src(getPath(config.src.root, "**/*.js"))
     .pipe(gulp.dest(config.build.root))
-    .pipe(
+/*    .pipe(
       browserSync.stream({
         once: true
       })
-    );
+    );*/
 }
 
 function rootFiles() {
   const enHighlight = fs.readFileSync("./src/css/Highlight.scss", "utf-8").toString();
   gutil.log(enHighlight);
-  return gulp.src(path.resolve(config.src.root, "*.*"))
+  return gulp.src(getPath(config.src.root, "*.*"))
     .pipe($.replace(/(<script data-main=['"])([^'"]+)(['"]\ssrc=['"])([^'"]+)(['"]>)/g, "$1" + git.short() + "/$2$3" + git.short() + "/$4$5"))      
     .pipe($.replace(/(href=['"])css\//g, "$1" + git.short() + "/css/"))
     .pipe($.replace(/<style>/g, '$&' + enHighlight))     
@@ -125,15 +126,14 @@ function rootFiles() {
     );
 }
 
+
+
+
 function baseTsc(isWatch, isDebug) {
-  const target = isWatch? config.build.root + "/js/": config.build.root + git.short() + "/js/";  
-  const OJET_LIB_PATH = isDebug? "libs/@oracle/oraclejet/dist/js/libs/oj/debug": "libs/@oracle/oraclejet/dist/js/libs/oj/min";  
-  const KNOCKOUT_LIB_PATH = isDebug? "libs/knockout/build/output/knockout-latest.debug": "libs/knockout/build/output/knockout-latest";  
+  const target = isWatch? config.build.root + "/": config.build.root + git.short() + "/";  
   const releaseFiles = $.filter(['**/*.js', '!**/*.spec.js']);
   const tsProject = $.typescript.createProject(config.tsConfig);    
   return tsProject.src()
-    .pipe($.replace(/##OJET_LIB##/g, OJET_LIB_PATH))     
-    .pipe($.replace(/##KNOCKOUT_LIB##/g, KNOCKOUT_LIB_PATH))         
     .pipe($.newer({
       dest: target,
       ext: '.js'
@@ -157,7 +157,7 @@ function baseTsc(isWatch, isDebug) {
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest(target))    
     .pipe(releaseFiles)
-    .pipe($.uglify())
+   // .pipe($.uglify())
     .pipe(browserSync.stream({
       once: true
     }));
@@ -180,9 +180,10 @@ function tscWatchDebug() {
 }
 
 function baseScss(isWatch) {
+  console.log("Tsc") ;
   const target = isWatch? config.build.root: config.build.root + git.short();  
   return gulp
-  .src(path.resolve(config.src.root, "**/*.scss"))
+  .src(getPath(config.src.root, "**/*.scss"))
   .pipe(
     newer({
       dest: config.build.root,
@@ -199,8 +200,8 @@ function baseScss(isWatch) {
     sass({
       outputStyle: "expanded",
       includePaths: [
-        path.resolve(config.src.root, "css/"),
-        path.resolve(config.nodeModules, "@oracle/oraclejet/dist/scss/")
+        getPath(config.src.root, "css/"),
+        getPath(config.nodeModules, "@oracle/oraclejet/dist/scss/")
         ],
       sourcemap: true
     })
@@ -215,7 +216,7 @@ function baseScss(isWatch) {
 function scssNoteSettings() {
   const target = config.build.css;  
   return gulp
-    .src(path.resolve(config.src.root, "css/NoteSettings.scss"))
+    .src(getPath(config.src.root, "css/NoteSettings.scss"))
     /* Commenting this out as this results in imported scss changes not being picked up. As a side-effect, scss compilation is much slower
     .pipe(
       newer({
@@ -229,8 +230,8 @@ function scssNoteSettings() {
       sass({
         outputStyle: "expanded",
         includePaths: [
-          path.resolve(config.src.root, "css/"),
-          path.resolve(config.nodeModules, "@oracle/oraclejet/dist/scss/")
+          getPath(config.src.root, "css/"),
+          getPath(config.nodeModules, "@oracle/oraclejet/dist/scss/")
           ],
         sourcemap: true
       })
@@ -258,13 +259,13 @@ function copyLibs() {
   gutil.log(libs);
   const libPath = config.build.root + git.short() + "/js";
   gutil.log(libPath);
-  gutil.log(path.resolve(config.nodeModules, libs.join(",")));
-  gutil.log(path.resolve(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1")));
+  gutil.log(getPath(config.nodeModules, libs.join(",")));
+  gutil.log(getPath(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1")));
   
-  //return gulp.src(path.resolve(config.nodeModules, libs.join(",")))
-  //  .pipe(gulp.dest(path.resolve(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1"))));        
-  return gulp.src(path.resolve(config.nodeModules, "{" + libs.join(",") + "}"))
-    .pipe(gulp.dest(path.resolve(libPath, "libs/")));    
+  //return gulp.src(getPath(config.nodeModules, libs.join(",")))
+  //  .pipe(gulp.dest(getPath(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1"))));        
+  return gulp.src(getPath(config.nodeModules, "{" + libs.join(",") + "}"))
+    .pipe(gulp.dest(getPath(libPath, "libs/")));    
 }
 
 function copyWebInf() {  
@@ -273,7 +274,7 @@ function copyWebInf() {
 }
 
 function copyBuildToRelease() {    
-  return gulp.src(path.resolve(config.build.root, "**/*"))        
+  return gulp.src(getPath(config.build.root, "**/*"))        
   .pipe(gulp.dest(config.release.root));  
 }
 
@@ -290,7 +291,7 @@ function removeOutJS() {
 }
 
 function optimize() {  
-  const rJsPath = path.resolve("./node_modules/.bin/r_js");
+  const rJsPath = getPath("./node_modules/.bin/r_js");
   return spawn(rJsPath, ["-o", "require.out.js"], { stdio: "inherit", stderr: "inherit" });  
 }
 
@@ -317,7 +318,7 @@ function warLimited() {
 function baseOther(isWatch) {
   const target = isWatch? config.build.root: config.build.root + git.short();
   return gulp.src(config.otherFiles, {
-      since: gulp.lastRun(other)
+    //  since: gulp.lastRun(other)
     })
     .pipe(gulp.dest(target));
 }
@@ -359,23 +360,23 @@ function baseSvg(isWatch) {
   }
  
   const target = config.build.svg;  
-  return gulp.src(path.resolve(config.src.root, '**/*.svg'))
+  return gulp.src(getPath(config.src.root, '**/*.svg'))
         .pipe(svgSprite(makeSvgSpriteOptions()))
-        .pipe(gulp.dest(path.resolve(target)))
+        .pipe(gulp.dest(getPath(target)))
 };
 
 function svgInjector(){
 
-        var svgs = gulp.src(path.resolve(config.build.svg, './core.svg'))
+        var svgs = gulp.src(getPath(config.build.svg, './core.svg'))
                   .pipe(svgstore({ inlineSvg: true }));
  
         function fileContents (filePath, file) {
            return file.contents.toString();
         }
  
-    return gulp.src(path.resolve(config.build.root, './index.html'))
+    return gulp.src(getPath(config.build.root, './index.html'))
           .pipe(inject(svgs, { transform: fileContents }))
-          .pipe(gulp.dest(path.resolve(config.build.root)))
+          .pipe(gulp.dest(getPath(config.build.root)))
           .pipe(
             browserSync.stream({
               once: true
@@ -385,8 +386,8 @@ function svgInjector(){
 };
 
 function imagesWatch() {
-  return gulp.src(path.resolve(config.src.root, '**/*.svg'))          
-    .pipe(gulp.dest(path.resolve(config.build.root)))
+  return gulp.src(getPath(config.src.root, '**/*.svg'))          
+    .pipe(gulp.dest(getPath(config.build.root)))
     .pipe(
       browserSync.stream({
         once: true
@@ -470,23 +471,55 @@ function startBrowserSync(baseDir, routes) {
   });
 }
 
+function getPath(param1, param2) {
+  return path.resolve(param1, param2).replace(/\\/gi, "/") ;
+}
+
 function serveRelease() {
   startBrowserSync(config.release.root, {});
 }
 
+
+gulp.task('nodemon', function (done) {
+  nodemon({
+    script: 'electron-server.js'
+  , ext: 'js html'
+  , env: { 'NODE_ENV': 'development' }
+  , done: done
+  })
+})
+
+
 function watch() {    
   const npmLibPath = "/js/libs/";  
-  var libPathObj = {};
-  
+  var libPathObj = {};  
   libPathObj[npmLibPath] = config.nodeModules;
-  console.log('npmLibPath:'+npmLibPath, " - ", config.nodeModules ) ;
-  startBrowserSync(config.build.root, libPathObj);    
-  gulp.watch(path.resolve(config.src.root, "**/*.html"), gulp.parallel(htmlWatch,svgWatch, svgInjector));
-  gulp.watch(path.resolve(config.src.root, "**/*.ts"), tscWatch);
-  gulp.watch(path.resolve(config.src.root, "**/*.scss"), scssWatch);
-  gulp.watch(path.resolve(config.src.root, "**/*.json"), jsonWatch);  
-  gulp.watch(path.resolve(config.src.root, "**/*.js"), jsWatch);  
-  gulp.watch(path.resolve(config.src.root, '**/*.svg'), gulp.series(imagesWatch,svgWatch,svgInjector));   
+ // console.log('npmLibPath1:'+npmLibPath, " - ", config.nodeModules ) ;
+//  startBrowserSync(config.build.root, libPathObj);  
+nodemon({
+  script: 'electron-server.js'
+, ext: 'js html'
+, env: { 'NODE_ENV': 'development' }
+
+})
+   allWatch() ;
+
+   //gulp.parallel( 'nodemon', allWatch ) ;
+   //gulp.start('nodemon');
+   //allWatch() ;
+}
+
+function nodeWatch() {
+    gulp.start('nodemon'); 
+} 
+    
+function allWatch() {
+  gulp.watch(getPath(config.src.root, "**/*.html"), htmlWatch );
+  gulp.watch(getPath(config.src.root, "**/*.ts"), tscWatch );
+  gulp.watch(getPath(config.src.root, "**/*.scss"), scssWatch);
+  gulp.watch(getPath(config.src.root, "**/*.json"), jsonWatch);  
+  gulp.watch(getPath(config.src.root, "**/*.js"), jsWatch);  
+//  gulp.watch(getPath(config.src.root, '**/*.svg'), imagesWatch);   
 }
 
 function watchDebug() {    
@@ -496,12 +529,12 @@ function watchDebug() {
   libPathObj[npmLibPath] = config.nodeModules;
   console.log('npmLibPath:'+npmLibPath, " - ", config.nodeModules ) ;
   startBrowserSync(config.build.root, libPathObj);    
-  gulp.watch(path.resolve(config.src.root, "**/*.html"), gulp.series(htmlWatch,svgWatch,svgInjector));
-  gulp.watch(path.resolve(config.src.root, "**/*.ts"), tscWatchDebug);
-  gulp.watch(path.resolve(config.src.root, "**/*.scss"), scssWatch);
-  gulp.watch(path.resolve(config.src.root, "**/*.json"), jsonWatch);  
-  gulp.watch(path.resolve(config.src.root, "**/*.js"), jsWatch);  
-  gulp.watch(path.resolve(config.src.root, '**/*.svg'),gulp.series(imagesWatch,svgWatch,svgInjector));   
+  gulp.watch(getPath(config.src.root, "**/*.html"), gulp.series(htmlWatch,svgWatch,svgInjector));
+  gulp.watch(getPath(config.src.root, "**/*.ts"), tscWatchDebug);
+  gulp.watch(getPath(config.src.root, "**/*.scss"), scssWatch);
+  gulp.watch(getPath(config.src.root, "**/*.json"), jsonWatch);  
+  gulp.watch(getPath(config.src.root, "**/*.js"), jsWatch);  
+  gulp.watch(getPath(config.src.root, '**/*.svg'),gulp.series(imagesWatch,svgWatch,svgInjector));   
 }
 
 const build = gulp.series(
@@ -520,8 +553,13 @@ const buildDebug = gulp.series(
 
 const buildWatch = gulp.series(
   cleanBuild, 
-  gulp.parallel(htmlWatch, tscWatch, scssWatch, otherWatch,svgWatch),
-  svgInjector
+  gulp.parallel(  htmlWatch, 
+                  tscWatch,
+                  scssWatch, 
+                  otherWatch
+                //  svgWatch
+                ),
+ // svgInjector
 );
 
 const buildWatchDebug = gulp.series(
@@ -539,13 +577,13 @@ function copyLibsForKarma() {
   gutil.log(libs);
   const libPath = config.build.root + "/js";
   gutil.log(libPath);
-  gutil.log(path.resolve(config.nodeModules, libs.join(",")));
-  gutil.log(path.resolve(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1")));
+  gutil.log(getPath(config.nodeModules, libs.join(",")));
+  gutil.log(getPath(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1")));
   
-  //return gulp.src(path.resolve(config.nodeModules, libs.join(",")))
-  //  .pipe(gulp.dest(path.resolve(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1"))));        
-  return gulp.src(path.resolve(config.nodeModules, "{" + libs.join(",") + "}"))
-    .pipe(gulp.dest(path.resolve(libPath, "libs/")));    
+  //return gulp.src(getPath(config.nodeModules, libs.join(",")))
+  //  .pipe(gulp.dest(getPath(libPath, "libs/" + libs.join(",").replace(/(.+)\*\*/, "$1"))));        
+  return gulp.src(getPath(config.nodeModules, "{" + libs.join(",") + "}"))
+    .pipe(gulp.dest(getPath(libPath, "libs/")));    
 }
 
 function karma(done) {
@@ -587,8 +625,8 @@ function execCommand(command, args, cb) {
   ctx.on('close', function(code) {
       if(cb){cb(code === 0 ? null : code);}
   })
-}
 
+}
 
 gulp.task("default", gulp.series(build, watch));
 gulp.task("watch", gulp.series(buildWatch, watch));

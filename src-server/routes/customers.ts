@@ -1,14 +1,22 @@
-//const {Customer, validate} = require('../models/customer'); 
-const mongoose = require('mongoose');
-const express = require('express');
+var Customer = require('../models/customer'); 
+var mongoose = require('mongoose'); 
+var express = require('express');
 const router = express.Router();
 
-router.get('/getUser', async (req, res) => {
+router.get('/getCustomer', async (req, res) => {      
   //const customers = await Customer.find().sort('name');
   //res.send(customers);
   console.log('getuser..');
-  res.send('{"valid":"yes"}') ;
+  res.send('{"valid":"yes57"}') ;
 });
+console.log(Customer) ;
+router.get('/getAllCustomers', async (req, res) => {      
+  const customers = await Customer.find().sort('name');
+  console.log(customers);
+  res.send(customers);
+});
+
+
 /*
 router.post('/', async (req, res) => {
   const { error } = validate(req.body); 

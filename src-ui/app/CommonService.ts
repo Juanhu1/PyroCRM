@@ -18,8 +18,8 @@ export class CommonService {
     return this.http.post('http://localhost:'+PORT+'/api/SaveUser/', user)
       .map((response: Response) => response.json());
   }
-  getUser() {
-    return this.http.get('http://localhost:'+PORT+'/api/customers/getUser/')
+  getAllCustomers() {
+    return this.http.get('http://localhost:'+PORT+'/api/customers/getAllCustomers/')
       .map((response: Response) => response.json());
   }
 }

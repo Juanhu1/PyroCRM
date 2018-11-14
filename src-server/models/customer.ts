@@ -1,5 +1,6 @@
-import {Joi} from "joi" ;
-import {mongoose} from "mongoose" ;
+
+const Joi = require('joi'); 
+var mongoose = require('mongoose'); 
 
 
 enum PAYMENTMETHODS {
@@ -15,7 +16,7 @@ enum FREQUENCY {
    OTHER
 }
 
-const Customer = mongoose.model('Customer', new mongoose.Schema({ 
+var Customer = mongoose.model('Customer', new mongoose.Schema({ 
   companyname: {
     type: String,   
     required: true,

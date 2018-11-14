@@ -17,7 +17,7 @@
          .catch(err => console.error('Could not connect to MongoDB...'));
 
     var app = express();
-    var publicPath = path.resolve(__dirname, './dist');
+    var publicPath = path.resolve(__dirname, './build');
     var port = PORT;
 
     app.use(bodyParser.json({limit:'50mb'})) ;
@@ -32,12 +32,12 @@
         res.setHeader('Access-Control-Allow-Credentials',true) ;
         next() ;
     }) ;
-    require('./src-server/startup/routes')(app);
+    require('./build/startup/routes')(app);
     // point for static assets
     app.use(express.static(publicPath));
 
     //view engine setup
-    app.set('views', path.join(__dirname, './dist'));
+    app.set('views', path.join(__dirname, './build'));
     app.engine('html', require('ejs').renderFile);
     app.set('view engine', 'html');
 
